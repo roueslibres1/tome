@@ -1,0 +1,21 @@
+= Welcome to Devops
+Ralf Mueller <ralf.freewheel@gmail.com>
+:experimental:
+
+*Congratulations!*
+
+When you are reading this you have found the documentation. 
+This documentation is a community effort. Therefore we will give a quick intro onto how to write documentation. 
+
+But first a few  disclaimers:
+
+NOTE: The header row is currently a placeholder until one of us learns enough html/css to fix it
+
+NOTE: A mini TOC on the right will also be rendered after we learn more html/css
+
+NOTE: The search bar is currently disabled since it is not working yet (But neither is the one of confluence)
+
+NOTE: The edit this page button does not show up. It really should. And sometimes it does. Also: Works on my machine when building the documentation for preview :)
+
+
+

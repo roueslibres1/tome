@@ -1,0 +1,23 @@
+= Documentation
+
+== Architectural Overview
+
+[ditaa]
+....
+                            +-----------+
+                        +-->|           |
+                        |   | docu-home |
+                        |   |           |
+ +--------+ aggregates  |   +-----------+
+ |        |-------------+
+ | Docu   |             | n +----------+
+ |        |             +-->|          |
+ +--------+                 | other    |
+     ^                      |          |
+     |                      +----------+
+     |                           :
+     |     triggers              |
+     +---------------------------+
+....
+
+This is just a sample. 
