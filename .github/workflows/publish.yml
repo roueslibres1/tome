@@ -37,3 +37,6 @@ jobs:
           folder: "public/docs"
           target-folder: "docs"
           commit-message: "ci: publish documentation for ${{ github.sha }}"
+          clean-exclude: |
+            .nojekyll
+            docs/.nojekyll
