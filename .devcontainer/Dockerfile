@@ -3,7 +3,7 @@
 # [Choice] Alpine version: 3.14, 3.13, 3.12, 3.11
 ARG VARIANT="latest"
 #FROM ghcr.io/roueslibres1/runner-antora:${VARIANT}
-FROM runner-antora:latest
+FROM ghcr.io/roueslibres1/runner-antora:latest
 
 # ** [Optional] Uncomment this section to install additional packages. **
 # RUN apk update \
