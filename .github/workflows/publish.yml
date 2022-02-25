@@ -4,32 +4,24 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
-  workflow_call:
 
-  workflow_dispatch:
 jobs:
   publish:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/roueslibres1/runner-antora
+      image: ghcr.io/roueslibres1/runner-antora:v0
       credentials:
-        username: ${{ github.actor }}
-        password: ${{ secrets.github_token }}
+        username: ${{ secrets.GHCR_USER }}
+        password: ${{ secrets.GHCR_TOKEN }}
     steps:
       - name: "Check out repository"
         uses: "actions/checkout@v2"
         with:
           fetch-depth: 0 # Fetch all branches and tags
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
       - name: "Build documentation with Antora"
-        uses: "docker://ghcr.io/roueslibres1/runner-antora@v0"
-        with:
-          args: "make docs"
+        run: |
+          make docs
+
       - name: "Upload generated artifact"
         if: "github.event_name == 'pull_request'"
         uses: "actions/upload-artifact@v2"
@@ -38,7 +30,7 @@ jobs:
           path: "${{ github.workspace }}/public/docs"
           retention-days: 14
       - name: "Deploy documentation to GitHub Pages"
-        if: "(github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref_name == 'init'"
+        if: "(github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref_name == 'master'"
         uses: "JamesIves/github-pages-deploy-action@v4.2.5"
         with:
           branch: "gh-pages"
