@@ -1,0 +1,21 @@
+site:
+  title: Tome
+  start_page: home::index.adoc
+antora:
+  extensions:
+    - require: "@antora/lunr-extension"
+      index_latest_only: true
+
+content:
+  sources:
+  - url: ./
+    start_path: docs
+
+asciidoc:
+  extensions:
+    - asciidoctor-kroki
+    - asciidoctor-emoji
+ui:
+  bundle:
+    url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/master/raw/build/ui-bundle.zip?job=bundle-stable
+    snapshot: true

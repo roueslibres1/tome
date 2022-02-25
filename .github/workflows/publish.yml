@@ -1,0 +1,39 @@
+name: Publish to GitHub Pages
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/roueslibres1/runner-antora:v0
+      credentials:
+        username: ${{ secrets.GHCR_USER }}
+        password: ${{ secrets.GHCR_TOKEN }}
+    steps:
+      - name: "Check out repository"
+        uses: "actions/checkout@v2"
+        with:
+          fetch-depth: 0 # Fetch all branches and tags
+      - name: "Build documentation with Antora"
+        run: |
+          make docs
+
+      - name: "Upload generated artifact"
+        if: "github.event_name == 'pull_request'"
+        uses: "actions/upload-artifact@v2"
+        with:
+          name: "documentation"
+          path: "${{ github.workspace }}/public/docs"
+          retention-days: 14
+      - name: "Deploy documentation to GitHub Pages"
+        if: "(github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref_name == 'master'"
+        uses: "JamesIves/github-pages-deploy-action@v4.2.5"
+        with:
+          branch: "gh-pages"
+          folder: "public/docs"
+          target-folder: "docs"
+          commit-message: "ci: publish documentation for ${{ github.sha }}"
