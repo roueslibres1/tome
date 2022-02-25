@@ -8,6 +8,32 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    services:
+      yuzutech-kroki:
+        image: yuzutech/kroki
+        env:
+          KROKI_BLOCKDIAG_HOST: blockdiag
+          KROKI_MERMAID_HOST: mermaid
+          KROKI_BPMN_HOST: bpmn
+          KROKI_EXCALIDRAW_HOST: excalidraw
+        ports:
+          - "8000:8000"
+      blockdiag:
+        image: yuzutech/kroki-blockdiag
+        ports:
+          - "8001:8001"
+      mermaid:
+        image: yuzutech/kroki-mermaid
+        ports:
+          - "8002:8002"
+      bpmn:
+        image: yuzutech/kroki-bpmn
+        ports:
+          - "8003:8003"
+      excalidraw:
+        image: yuzutech/kroki-excalidraw
+        ports:
+          - "8004:8004"
     container:
       image: ghcr.io/roueslibres1/runner-antora:v0
       credentials:

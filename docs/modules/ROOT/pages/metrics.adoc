@@ -1,0 +1,50 @@
+[graphviz]
+....
+digraph logging {
+  subgraph cluster_aws {
+    label = "AWS";
+    // We provision additional services in AWS.
+    aws_elasticsearch [label="ElasticSearch"];
+    // We run Hero.NET services in Amazon ECS.
+    subgraph cluster_ecs {
+      label = "ECS";
+      subgraph cluster_ecs_instance_1 {
+        label = "Instance #N";
+        container [label="Container #K"];
+        fluentd [label="FluentD"];
+      }
+    }
+    // We run dedicated servers in Amazon Gamelift.
+    subgraph cluster_gamelift {
+      label = "GameLift";
+      subgraph cluster_gamlift_instance_1 {
+        label = "Instance #N";
+        process [label="Process #K"];
+        filebeat [label="Filebeat"];
+      }
+    }
+  }
+  subgraph cluster_msr {
+      label = "DC";
+      // a comment
+      subgraph cluster_service_instance_1 {
+          label = "Server #N";
+          rdvnode [label="Node #K"];
+      }
+      services [label="UbiServices\nRemoteLogs"];
+      // flume
+      flume [label="Flume"];
+  }
+  // Hero.NET logs.
+  container -> fluentd [label="output"];
+  fluentd -> aws_elasticsearch [label="forward"];
+  // Rendez-Vous logs.
+  rdvnode -> flume [label="logging"];
+  flume -> aws_elasticsearch;
+  // Dedicated server logs.
+  process -> filebeat [label="output"];
+  filebeat -> aws_elasticsearch [label="forward"];
+  // Remote logs.
+  services -> aws_elasticsearch [label="forward"];
+}
+....

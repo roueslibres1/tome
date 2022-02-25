@@ -15,6 +15,13 @@ asciidoc:
   extensions:
     - asciidoctor-kroki
     - asciidoctor-emoji
+  attributes:
+    kroki-server-url: "http://yuzutech-kroki:8000"
+    kroki-fetch-diagram: true
+    experimental: true
+    idprefix: "@"
+    idseparator: "-@"
+    tabs: tabs
 ui:
   bundle:
     url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/master/raw/build/ui-bundle.zip?job=bundle-stable
