@@ -2,14 +2,18 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
 <loc>https://roueslibres1.github.io/tome/docs/home/documentation.html</loc>
-<lastmod>2022-02-25T23:16:22.310Z</lastmod>
+<lastmod>2022-02-28T19:36:09.893Z</lastmod>
 </url>
 <url>
 <loc>https://roueslibres1.github.io/tome/docs/home/index.html</loc>
-<lastmod>2022-02-25T23:16:22.310Z</lastmod>
+<lastmod>2022-02-28T19:36:09.893Z</lastmod>
+</url>
+<url>
+<loc>https://roueslibres1.github.io/tome/docs/home/joe/codegeneration.html</loc>
+<lastmod>2022-02-28T19:36:09.893Z</lastmod>
 </url>
 <url>
 <loc>https://roueslibres1.github.io/tome/docs/home/metrics.html</loc>
-<lastmod>2022-02-25T23:16:22.310Z</lastmod>
+<lastmod>2022-02-28T19:36:09.893Z</lastmod>
 </url>
 </urlset>
