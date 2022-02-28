@@ -5,7 +5,8 @@ The following will illustrate the use and usecases.
 
 The generation tools work with the https://gitlab.com/cestus/tools/fabricator[Fabricator] framework and are implemented as plugins. 
 
-== Installation
+== Quickstart
+=== Installation
 
 Plugins can be installed as linux binaries from github releases or if golang is installed directly with 
 
@@ -16,6 +17,262 @@ go install github.com/roueslibres1/fabricator-generate-project-go/cmd/fabricator
 go install github.com/roueslibres1/fabricator-generate-plugin-go/cmd/fabricator-generate-plugin-go@latest
 go install github.com/roueslibres1/fabricator-generate-tool-go/cmd/fabricator-generate-tool-go@latest
 go install github.com/roueslibres1/fabricator-generate-go/cmd/fabricator-generate-go@latest
-
 ----
 
+=== Usage
+
+Using fabricator is based on a configuration file `.fabricator.yml` which defines the actions to take when composing different fabricator plugins. 
+
+Each fabricator file consists of [1..n] components. 
+
+[source, yaml]
+----
+# ./fabricator.yml
+apiVersion: fabricator.cestus.io/v1alpha1
+kind: Config
+components:
+  - name: cmdsample
+    generator: fabricator-generate-project-go #<1>
+    spec: # <2>
+      goModule: github.com/roueslibres1/cmdsample
+      repoURL: https://github.com/roueslibres1/cmdsample
+      isTool: true
+----
+<1> generator plugin to use for this component
+<2> configuration values for the plugin
+
+execution of `fabricator generate project go` in the directory with the config file will result into the plugin reading the part of the configuration where it is the generator and executing accordingly
+
+A more complete example for a command line tool looks like this
+[source, yaml]
+----
+# ./fabricator.yml
+apiVersion: fabricator.cestus.io/v1alpha1
+kind: Config
+components:
+  - name: cmdsample
+    generator: fabricator-generate-project-go  #<1>
+    spec: 
+      goModule: github.com/roueslibres1/cmdsample
+      repoURL: https://github.com/roueslibres1/cmdsample
+      isTool: true #<2>
+  - name: cmdsample
+    generator: fabricator-generate-tool-go #<3>
+    spec:
+      toolName: cmdsample
+      commands:
+        - name: ls
+          flags:
+            - name: all
+              type: bool
+              default: false
+              usage: set true to list all files
+            - name: long
+              type: bool
+              default: false
+              usage: set true to use long form
+  - name: cmdsample
+    generator: fabricator-generate-go # <4>
+    spec:
+      packageName: cmdsample
+----
+<1> definition for a golang project. Which contains basic setup and ci definitions
+<2> it is for a tool which changes the generated ci definitions 
+<3> definition for a cli application which will generate the setup for a cli application with the commands and flags found in the `Spec`
+<4> convenience plugin to tie everything into the go toolchain. 
+
+=== Bootstrap 
+Fully generating a definition like the one above would require to execute all specified generation plugins in order. 
+
+TO facilitate this the fabricator-generate-go plugin has an bootstrap option to automate this. 
+
+[source, bash]
+----
+fabricator generate go --bootstrap 
+----
+
+will result in calling of all generation plugins which are specified in the file
+
+== Plugins
+=== fabricator-generate-project-go
+A fabricator plugin to generate a project for a golang application 
+An up to date list of the config options can also found at https://github.com/roueslibres1/fabricator-generate-project-go/blob/main/pkg/fabricator-generate-project-go/testdata/deserialize.yml[repo]
+
+==== Config
+[source, yaml]
+----
+apiVersion: fabricator.cestus.io/v1alpha1
+kind: Config
+components:
+  - name: "fabricator-generate-project-go"
+    generator: fabricator-generate-project-go
+    spec:
+      goModule: "code.cestus.io/testvalue"
+      repoURL: "code.cestus.io/repo"
+      minimal: false # <1> <2>
+      isLib: true # <3>
+      isService: true # <4>
+      isTool: true # <5>
+----
+<1> set of exclusive config flags
+<2> minimal: no ci, vscode helpers
+<3> for libraries
+<4> for Domainservices
+<5> for a tool (cli application)
+
+=== fabricator-generate-plugin-go
+A fabricator plugin to generate an plugin
+
+An up to date list of the config options can also found at https://github.com/roueslibres1/fabricator-generate-plugin-go/blob/main/pkg/fabricator-generate-plugin-go/testdata/deserialize.yml[repo]
+
+==== Config
+[source, yaml]
+----
+apiVersion: fabricator.cestus.io/v1alpha1
+kind: Config
+components:
+- name: fabricator-generate-plugin-go
+  generator: fabricator-generate-plugin-go
+  spec:
+    pinDependency: # <1>
+#      "github.com/test":
+#        name: "github.com/test"
+#        version: "v1.0.0"
+    replaceDependency: #<2>
+#      "github.com/test":
+#        name: "github.com/test"
+#        with: "github.com/test@v1.2.4"
+    toolDependency: #<3>
+#        "github.com/test":
+#         name: "github.com/test"
+    pluginName: fabricator-generate-plugin-go #<4>
+    isGenerationPlugin: true #<5>
+----
+<1> pins a used dependency to a specific version (latest will be used otherwise)
+<2> allows replacing a dependency (usefull in fork workflows)
+<3> defines dependencies of tools which will be used in `go generate` sometimes those change go mod files, but are not included in the project directly so go.mod would be not stable.  
+
+=== fabricator-generate-tool-go
+A fabricator plugin to generate a cli application
+
+An up to date list of the config options can also found at https://github.com/roueslibres1/fabricator-generate-tool-go/blob/main/pkg/fabricator-generate-tool-go/testdata/deserialize.yml[repo]
+
+==== Config
+[source, yaml]
+----
+apiVersion: fabricator.cestus.io/v1alpha1
+kind: Config
+components:
+  - name: "fabricator-generate-tool-go"
+    generator: fabricator-generate-tool-go
+    spec:
+      pinDependency: #<1>
+      #      "github.com/test":
+      #        name: "github.com/test"
+      #        version: "v1.0.0"
+      replaceDependency:
+      #      "github.com/test":
+      #        name: "github.com/test"
+      #        with: "github.com/test@v1.2.4"
+      toolDependency:
+      #        "github.com/test":
+      #         name: "github.com/test"
+      ## Dependencies cannot contain values because tests would inject them into the go.mod and go.sum files as real dependencies
+      toolName: wombat
+      commands:
+        - name: test
+          flags: #<2>
+            - name: all #<3>
+              type: bool
+              default: false
+              usage: set to true
+            - name: num32
+              type: int
+              default: -1
+              usage: int32 value
+            - name: num64
+              type: int64
+              default: -1
+              usage: int64 value
+            - name: unum32
+              type: uint
+              default: 1
+              usage: uint32 value
+            - name: unum64
+              type: uint64
+              default: 1
+              usage: uint64 value
+            - name: str
+              type: string
+              default: '"default string"'
+              usage: a string
+            - name: fl
+              type: float64
+              default: 1.02
+              usage: float64 value
+        - name: ls
+          flags:
+            - name: all
+              type: bool
+              default: false
+              usage: set to true
+----
+<1> common in plugins
+<2> all datatypes usable as flags 
+<3> variable name of the flag
+
+==== Features
+* Version command: All tools have a version command by default
+* Supports cli parameters, config file, environment_variable
+
+All tools will read a `./config.toml` by default. (the location for this file can be overriden)
+
+Those files look as follows
+
+[source, toml]
+----
+[app]  #<1>
+    loglevel = "Debug2"
+[ls] #<2>
+    all = true <3>
+----
+<1> app section shared with all tools
+<2> subsection for command 'ls'
+<3> flagvalue
+
+Flags can also be set as environment varibles in the form of `CLINAME_COMMAND_FLAG`
+
+That means that in above example setting the all flag of the ls command can be done by
+
+1. `wobat ls --all`
+2. setting it in the congig file (see above)
+3. `export WOMBAT_LS_ALL=true`
+
+=== fabricator-generate-go
+A fabricator plugin to generate go generate files
+
+An up to date list of the config options can also found at https://github.com/roueslibres1/fabricator-generate-go/blob/main/pkg/fabricator-generate-go/testdata/deserialize.yml[repo]
+
+[source, yaml]
+----
+apiVersion: fabricator.cestus.io/v1alpha1
+kind: Config
+components:
+    - name: "fabricator-generate-go"
+      generator: fabricator-generate-go
+      spec:
+          pinDependency:
+          #      "github.com/test":
+          #        name: "github.com/test"
+          #        version: "v1.0.0"
+          replaceDependency:
+          #      "github.com/test":
+          #        name: "github.com/test"
+          #        with: "github.com/test@v1.2.4"
+          toolDependency:
+          #        "github.com/test":
+          #         name: "github.com/test"
+
+          packageName: "fabricator-generate-go" <1>
+----
+<1> package name for the generated file. This should normally match the name of the tool/service/plugin
