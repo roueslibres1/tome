@@ -1,0 +1,26 @@
+<header class="header" role="banner">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="{{or site.url (or siteRootUrl siteRootPath)}}">{{site.title}}</a>
+      {{#if env.DOCSEARCH_ENABLED}}
+      <div class="navbar-item">
+        <input id="search-input" type="text" placeholder="Search docs">
+      </div>
+      {{/if}}
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="{{site.url}}">Home</a>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Shortcuts</a>
+          <div class="navbar-dropdown">
+            <div class="navbar-item"><strong>Docs</strong></div>
+            <a class="navbar-item" href="https://github.com/roueslibres1/tome" target="_blank">Repository</a>
+            <div class="navbar-item"><strong>Wiki</strong></div>
+            <a class="navbar-item" href="https://github.com/RouesLibres/FreeWheel/wiki/" target="_blank">Wiki</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
