@@ -121,8 +121,10 @@ The following will illustrate the use and usecases.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="installation"><a class="anchor" href="#installation"></a>Installation</h2>
+<h2 id="quickstart"><a class="anchor" href="#quickstart"></a>Quickstart</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="installation"><a class="anchor" href="#installation"></a>Installation</h3>
 <div class="paragraph">
 <p>Plugins can be installed as linux binaries from github releases or if golang is installed directly with</p>
 </div>
@@ -133,6 +135,414 @@ go install github.com/roueslibres1/fabricator-generate-project-go/cmd/fabricator
 go install github.com/roueslibres1/fabricator-generate-plugin-go/cmd/fabricator-generate-plugin-go@latest
 go install github.com/roueslibres1/fabricator-generate-tool-go/cmd/fabricator-generate-tool-go@latest
 go install github.com/roueslibres1/fabricator-generate-go/cmd/fabricator-generate-go@latest</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="usage"><a class="anchor" href="#usage"></a>Usage</h3>
+<div class="paragraph">
+<p>Using fabricator is based on a configuration file <code>.fabricator.yml</code> which defines the actions to take when composing different fabricator plugins.</p>
+</div>
+<div class="paragraph">
+<p>Each fabricator file consists of [1..n] components.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># ./fabricator.yml
+apiVersion: fabricator.cestus.io/v1alpha1
+kind: Config
+components:
+  - name: cmdsample
+    generator: fabricator-generate-project-go <i class="conum" data-value="1"></i><b>(1)</b>
+    spec: <i class="conum" data-value="2"></i><b>(2)</b>
+      goModule: github.com/roueslibres1/cmdsample
+      repoURL: https://github.com/roueslibres1/cmdsample
+      isTool: true</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>generator plugin to use for this component</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>configuration values for the plugin</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>execution of <code>fabricator generate project go</code> in the directory with the config file will result into the plugin reading the part of the configuration where it is the generator and executing accordingly</p>
+</div>
+<div class="paragraph">
+<p>A more complete example for a command line tool looks like this</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># ./fabricator.yml
+apiVersion: fabricator.cestus.io/v1alpha1
+kind: Config
+components:
+  - name: cmdsample
+    generator: fabricator-generate-project-go  <i class="conum" data-value="1"></i><b>(1)</b>
+    spec:
+      goModule: github.com/roueslibres1/cmdsample
+      repoURL: https://github.com/roueslibres1/cmdsample
+      isTool: true <i class="conum" data-value="2"></i><b>(2)</b>
+  - name: cmdsample
+    generator: fabricator-generate-tool-go <i class="conum" data-value="3"></i><b>(3)</b>
+    spec:
+      toolName: cmdsample
+      commands:
+        - name: ls
+          flags:
+            - name: all
+              type: bool
+              default: false
+              usage: set true to list all files
+            - name: long
+              type: bool
+              default: false
+              usage: set true to use long form
+  - name: cmdsample
+    generator: fabricator-generate-go <i class="conum" data-value="4"></i><b>(4)</b>
+    spec:
+      packageName: cmdsample</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>definition for a golang project. Which contains basic setup and ci definitions</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>it is for a tool which changes the generated ci definitions</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>definition for a cli application which will generate the setup for a cli application with the commands and flags found in the <code>Spec</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>convenience plugin to tie everything into the go toolchain.</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="bootstrap"><a class="anchor" href="#bootstrap"></a>Bootstrap</h3>
+<div class="paragraph">
+<p>Fully generating a definition like the one above would require to execute all specified generation plugins in order.</p>
+</div>
+<div class="paragraph">
+<p>TO facilitate this the fabricator-generate-go plugin has an bootstrap option to automate this.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">fabricator generate go --bootstrap</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>will result in calling of all generation plugins which are specified in the file</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="plugins"><a class="anchor" href="#plugins"></a>Plugins</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="fabricator-generate-project-go"><a class="anchor" href="#fabricator-generate-project-go"></a>fabricator-generate-project-go</h3>
+<div class="paragraph">
+<p>A fabricator plugin to generate a project for a golang application
+An up to date list of the config options can also found at <a href="https://github.com/roueslibres1/fabricator-generate-project-go/blob/main/pkg/fabricator-generate-project-go/testdata/deserialize.yml">repo</a></p>
+</div>
+<div class="sect3">
+<h4 id="config"><a class="anchor" href="#config"></a>Config</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: fabricator.cestus.io/v1alpha1
+kind: Config
+components:
+  - name: "fabricator-generate-project-go"
+    generator: fabricator-generate-project-go
+    spec:
+      goModule: "code.cestus.io/testvalue"
+      repoURL: "code.cestus.io/repo"
+      minimal: false <i class="conum" data-value="1"></i><b>(1)</b> <i class="conum" data-value="2"></i><b>(2)</b>
+      isLib: true <i class="conum" data-value="3"></i><b>(3)</b>
+      isService: true <i class="conum" data-value="4"></i><b>(4)</b>
+      isTool: true <i class="conum" data-value="5"></i><b>(5)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>set of exclusive config flags</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>minimal: no ci, vscode helpers</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>for libraries</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>for Domainservices</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>for a tool (cli application)</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="fabricator-generate-plugin-go"><a class="anchor" href="#fabricator-generate-plugin-go"></a>fabricator-generate-plugin-go</h3>
+<div class="paragraph">
+<p>A fabricator plugin to generate an plugin</p>
+</div>
+<div class="paragraph">
+<p>An up to date list of the config options can also found at <a href="https://github.com/roueslibres1/fabricator-generate-plugin-go/blob/main/pkg/fabricator-generate-plugin-go/testdata/deserialize.yml">repo</a></p>
+</div>
+<div class="sect3">
+<h4 id="config-2"><a class="anchor" href="#config-2"></a>Config</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: fabricator.cestus.io/v1alpha1
+kind: Config
+components:
+- name: fabricator-generate-plugin-go
+  generator: fabricator-generate-plugin-go
+  spec:
+    pinDependency: <i class="conum" data-value="1"></i><b>(1)</b>
+#      "github.com/test":
+#        name: "github.com/test"
+#        version: "v1.0.0"
+    replaceDependency: <i class="conum" data-value="2"></i><b>(2)</b>
+#      "github.com/test":
+#        name: "github.com/test"
+#        with: "github.com/test@v1.2.4"
+    toolDependency: <i class="conum" data-value="3"></i><b>(3)</b>
+#        "github.com/test":
+#         name: "github.com/test"
+    pluginName: fabricator-generate-plugin-go <i class="conum" data-value="4"></i><b>(4)</b>
+    isGenerationPlugin: true <i class="conum" data-value="5"></i><b>(5)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>pins a used dependency to a specific version (latest will be used otherwise)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>allows replacing a dependency (usefull in fork workflows)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>defines dependencies of tools which will be used in <code>go generate</code> sometimes those change go mod files, but are not included in the project directly so go.mod would be not stable.</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="fabricator-generate-tool-go"><a class="anchor" href="#fabricator-generate-tool-go"></a>fabricator-generate-tool-go</h3>
+<div class="paragraph">
+<p>A fabricator plugin to generate a cli application</p>
+</div>
+<div class="paragraph">
+<p>An up to date list of the config options can also found at <a href="https://github.com/roueslibres1/fabricator-generate-tool-go/blob/main/pkg/fabricator-generate-tool-go/testdata/deserialize.yml">repo</a></p>
+</div>
+<div class="sect3">
+<h4 id="config-3"><a class="anchor" href="#config-3"></a>Config</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: fabricator.cestus.io/v1alpha1
+kind: Config
+components:
+  - name: "fabricator-generate-tool-go"
+    generator: fabricator-generate-tool-go
+    spec:
+      pinDependency: <i class="conum" data-value="1"></i><b>(1)</b>
+      #      "github.com/test":
+      #        name: "github.com/test"
+      #        version: "v1.0.0"
+      replaceDependency:
+      #      "github.com/test":
+      #        name: "github.com/test"
+      #        with: "github.com/test@v1.2.4"
+      toolDependency:
+      #        "github.com/test":
+      #         name: "github.com/test"
+      ## Dependencies cannot contain values because tests would inject them into the go.mod and go.sum files as real dependencies
+      toolName: wombat
+      commands:
+        - name: test
+          flags: <i class="conum" data-value="2"></i><b>(2)</b>
+            - name: all <i class="conum" data-value="3"></i><b>(3)</b>
+              type: bool
+              default: false
+              usage: set to true
+            - name: num32
+              type: int
+              default: -1
+              usage: int32 value
+            - name: num64
+              type: int64
+              default: -1
+              usage: int64 value
+            - name: unum32
+              type: uint
+              default: 1
+              usage: uint32 value
+            - name: unum64
+              type: uint64
+              default: 1
+              usage: uint64 value
+            - name: str
+              type: string
+              default: '"default string"'
+              usage: a string
+            - name: fl
+              type: float64
+              default: 1.02
+              usage: float64 value
+        - name: ls
+          flags:
+            - name: all
+              type: bool
+              default: false
+              usage: set to true</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>common in plugins</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>all datatypes usable as flags</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>variable name of the flag</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="features"><a class="anchor" href="#features"></a>Features</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>Version command: All tools have a version command by default</p>
+</li>
+<li>
+<p>Supports cli parameters, config file, environment_variable</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>All tools will read a <code>./config.toml</code> by default. (the location for this file can be overriden)</p>
+</div>
+<div class="paragraph">
+<p>Those files look as follows</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[app]  <i class="conum" data-value="1"></i><b>(1)</b>
+    loglevel = "Debug2"
+[ls] <i class="conum" data-value="2"></i><b>(2)</b>
+    all = true <i class="conum" data-value="3"></i><b>(3)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>app section shared with all tools</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>subsection for command 'ls'</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>flagvalue</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Flags can also be set as environment varibles in the form of <code>CLINAME_COMMAND_FLAG</code></p>
+</div>
+<div class="paragraph">
+<p>That means that in above example setting the all flag of the ls command can be done by</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><code>wobat ls --all</code></p>
+</li>
+<li>
+<p>setting it in the congig file (see above)</p>
+</li>
+<li>
+<p><code>export WOMBAT_LS_ALL=true</code></p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="fabricator-generate-go"><a class="anchor" href="#fabricator-generate-go"></a>fabricator-generate-go</h3>
+<div class="paragraph">
+<p>A fabricator plugin to generate go generate files</p>
+</div>
+<div class="paragraph">
+<p>An up to date list of the config options can also found at <a href="https://github.com/roueslibres1/fabricator-generate-go/blob/main/pkg/fabricator-generate-go/testdata/deserialize.yml">repo</a></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: fabricator.cestus.io/v1alpha1
+kind: Config
+components:
+    - name: "fabricator-generate-go"
+      generator: fabricator-generate-go
+      spec:
+          pinDependency:
+          #      "github.com/test":
+          #        name: "github.com/test"
+          #        version: "v1.0.0"
+          replaceDependency:
+          #      "github.com/test":
+          #        name: "github.com/test"
+          #        with: "github.com/test@v1.2.4"
+          toolDependency:
+          #        "github.com/test":
+          #         name: "github.com/test"
+
+          packageName: "fabricator-generate-go" <i class="conum" data-value="1"></i><b>(1)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>package name for the generated file. This should normally match the name of the tool/service/plugin</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
