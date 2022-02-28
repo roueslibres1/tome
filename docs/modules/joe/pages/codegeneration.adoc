@@ -1,0 +1,21 @@
+= Codegeneration
+
+Services and tools rely heavily on code generation. 
+The following will illustrate the use and usecases. 
+
+The generation tools work with the https://gitlab.com/cestus/tools/fabricator[Fabricator] framework and are implemented as plugins. 
+
+== Installation
+
+Plugins can be installed as linux binaries from github releases or if golang is installed directly with 
+
+[source, bash]
+----
+go install code.cestus.io/tools/fabricator/cmd/fabricator@latest
+go install github.com/roueslibres1/fabricator-generate-project-go/cmd/fabricator-generate-project-go@latest
+go install github.com/roueslibres1/fabricator-generate-plugin-go/cmd/fabricator-generate-plugin-go@latest
+go install github.com/roueslibres1/fabricator-generate-tool-go/cmd/fabricator-generate-tool-go@latest
+go install github.com/roueslibres1/fabricator-generate-go/cmd/fabricator-generate-go@latest
+
+----
+
