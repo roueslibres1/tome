@@ -3,8 +3,7 @@ WEBSITE_URL ?= https://roueslibres1.github.io/tome
 .PHONY: docs
 ## Builds the documentation
 docs: 
-	# cp -RT "$$(yarn global dir)/node_modules/@antora/lunr-extension/supplemental_ui/" 'docs/supplemental_ui'
-	URL='$(WEBSITE_URL)/docs' antora generate 'site.yml' --to-dir 'public/docs'
+	URL='$(WEBSITE_URL)' antora generate 'site.yml' --to-dir 'public/docs'
 
 # Plonk the following at the end of your Makefile
 .DEFAULT_GOAL := show-help
